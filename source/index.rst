@@ -10,6 +10,7 @@ Welcome to MathLing Programming Course Lecture Notes's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   gitanatomu
 
 Indices and tables
 ==================
