@@ -31,7 +31,7 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.graphviz',
     'sphinx.ext.ifconfig',
-    'sphinx.ext.imgmath',
+    'sphinx.ext.mathjax',
     'sphinx.ext.todo',
     'sphinxcontrib.blockdiag',
     'sphinxcontrib.seqdiag',
