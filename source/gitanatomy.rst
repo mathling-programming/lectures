@@ -60,7 +60,7 @@ Merkle tree
      node [ fontname = "times-italic" ]
      ex_blob [ shape = note, label = "Blob object" ]
      ex_tree [ shape = folder, label = "Tree object" ]
-     ex_commit [ shape = commit, label = "Commit object" ]
+     ex_commit [ shape = component, label = "Commit object" ]
      ex_tag [ shape = cds, label = "Tag (object)" ]
      ex_branch [ shape = invhouse, label = "Branch" ]
      ex_head [ shape = point, xlabel = "Head" ]
@@ -257,7 +257,7 @@ Forced push
           local_branch_forced2 [ shape = invhouse, label = "branch", fontname = "monospace" ]
           commit2_2 [ shape = component, label = "Commit 2"]
 
-          base_commit1 -> commit3 [ color = gray ]
+          base_commit1 -> commit3 [ arrowhead = inv, color = gray ]
           local_branch2 -> base_commit1 [ constraint = false ]
           local_branch2 -> local_branch_new2 [ style = dashed, minlen = 2 ]
           local_branch_new2 -> commit3 [ constraint = false, color = gray ]
@@ -269,8 +269,150 @@ Forced push
       base_commit -> base_commit0 [ label = "git pull", fontname = "monospace" ]
       base_commit -> base_commit1 [ label = "git pull", fontname = "monospace" ]
       commit3 -> commit3_base [ label = "git push", fontname = "monospace" ]
-      commit2 -> origin_branch_new [ label = "git push", color = red, arrowhead = tee ]
-      commit2 -> commit2_base [ label = "git push --force" ]
+      commit2 -> origin_branch_new [ label = "git push", color = red, arrowhead = tee, fontname = "monospace" ]
+      commit2 -> commit2_base [ label = "git push --force", fontname = "monospace" ]
       commit2_base -> commit2_2 [ label = "git pull", fontname = "monospace" ]
    }
 
+Merge vs rebase
+---------------
+
+.. graphviz::
+
+   digraph {
+      node [ shape = component, fontname = "monospace" ]
+      edge [ fontname = "monospace", labelfontname = "monospace" ]
+      compound = true
+      rankdir = LR
+      subgraph cluster_old {
+          base_commit [ label = "Base commit" ]
+          commit1 [ label = "Commit 1" ]
+          commit2 [ label = "Commit 2" ]
+          commit3 [ label = "Commit 3" ]
+          commit4 [ label = "Commit 4" ]
+          branch1 [ shape = invhouse, label = "stable" ]
+          branch2 [ shape = invhouse, label = "devel" ]
+          head [ shape = point, xlabel = "HEAD" ]
+
+          commit1 -> base_commit
+          commit2 -> commit1
+          commit3 -> base_commit
+          commit4 -> commit3
+
+          branch1 -> commit2
+          branch2 -> commit4
+          head -> commit4
+      }
+
+      subgraph cluster_merged {
+          base_commita [ label = "Base commit" ]
+          commit1a [ label = "Commit 1" ]
+          commit2a [ label = "Commit 2" ]
+          commit3a [ label = "Commit 3" ]
+          commit4a [ label = "Commit 4" ]
+          merge [ label = "Merge commit" ]
+          branch1a [ shape = invhouse, label = "stable" ]
+          branch2a [ shape = invhouse, label = "devel" ]
+          heada [ shape = point, xlabel = "HEAD" ]
+
+          commit1a -> base_commita
+          commit2a -> commit1a
+          commit3a -> base_commita
+          commit4a -> commit3a
+
+          merge -> commit2a
+          merge -> commit4a
+
+          branch2a -> merge
+          branch1a -> commit4a
+          heada -> merge
+      }
+
+      command [ label = "git merge stable", shape = rarrow ]
+      head -> command [ style = invis ]
+      command -> heada [ style = invis ]
+
+      subgraph cluster_rebased {
+          base_commitb [ label = "Base commit" ]
+          commit1b [ label = "Commit 1" ]
+          commit2b [ label = "Commit 2" ]
+          commit3b [ label = "Commit 3&prime;" ]
+          commit4b [ label = "Commit 4&prime;" ]
+          commit3bo [ label = "Commit 3", color = lightgray, textcolor = lightgray ]
+          commit4bo [ label = "Commit 4", color = lightgray, textcolor = lightgray  ]
+          branch1b [ shape = invhouse, label = "stable" ]
+          branch2b [ shape = invhouse, label = "devel" ]
+          headb [ shape = point, xlabel = "HEAD" ]
+
+          commit1b -> base_commitb
+          commit2b -> commit1b
+          commit3b -> commit2b
+          commit4b -> commit3b
+          commit3bo -> base_commitb
+          commit4bo -> commit3bo
+
+          branch2b -> commit4b
+          branch1b -> commit2b
+          headb -> commit4b
+      }
+
+      command2 [ label = "git rebase stable", shape = rarrow ]
+      head -> command2 [ style = invis ]
+      command2 -> headb [ style = invis ]
+   }
+
+
+Distributed workflow with PRs
+-----------------------------
+
+.. graphviz::
+
+   digraph {
+      node [ shape = component ]
+      edge [ fontname = "monospace" ]
+      subgraph cluster_local {
+         label = "Local repo"
+
+         base0 [ label = "Base commit" ]
+         commit1 [ label = "Commit 1" ]
+         local [ shape = "invhouse", label = "mybranch" ]
+         local -> base0 [ label = "git checkout -b mybranch" ]
+         base0 -> commit1 [ arrowhead = inv, label = "git commit" ]
+         commit1prime [ label = "Commit 1&prime;" ]
+         commit1 -> commit1prime [ label = "git commit --amend" ]
+         commit1prime2 [ label = "Commit 1&Prime;" ]
+         commit1prime -> commit1prime2 [ label = "git commit --amend" ]
+      }
+
+      subgraph cluster_remote {
+         label = "Remote repo"
+
+         base [ label = "Base commit" ]
+         main [ shape = invhouse, label = "main", fontname = "monospace" ]
+         main -> base
+         commit1a [ label = "Commit 1" ]
+         userbranch [ shape = invhouse, label = "user/name/feature", fontname = "monospace" ]
+         userbranch -> commit1a
+         commit1primea [ label = "Commit 1&prime;" ]
+         userbranch1 [ shape = invhouse, label = "user/name/feature", fontname = "monospace" ]
+         userbranch1 -> commit1primea
+         commit1prime2a [ label = "Commit 1&Prime;" ]
+         userbranch2 [ shape = invhouse, label = "user/name/feature", fontname = "monospace" ]
+         userbranch2 -> commit1prime2a
+
+         userbranch -> userbranch1 [ style = dotted ]
+         userbranch1 -> userbranch2 [ style = dotted ]
+
+         commit2a [ label = "Commit 2" ]
+         base -> commit2a [ arrowhead = inv ]
+      }
+
+      subgraph cluster_maintainer {
+         label = "Maintainer"
+      }
+
+      base -> base0 [ label = "git pull" ]
+      commit1 -> commit1a [ label = "git push origin HEAD:user/name/feature"]
+      commit1prime -> commit1primea [ label = "git push origin +HEAD:user/name/feature"]
+      commit1prime2 -> commit1prime2a [ label = "git push origin +HEAD:user/name/feature"]
+   }
