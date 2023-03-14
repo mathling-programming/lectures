@@ -338,8 +338,8 @@ Merge vs rebase
           commit2b [ label = "Commit 2" ]
           commit3b [ label = "Commit 3&prime;" ]
           commit4b [ label = "Commit 4&prime;" ]
-          commit3bo [ label = "Commit 3", color = lightgray, textcolor = lightgray ]
-          commit4bo [ label = "Commit 4", color = lightgray, textcolor = lightgray  ]
+          commit3bo [ label = "Commit 3", color = lightgray, fontcolor = lightgray ]
+          commit4bo [ label = "Commit 4", color = lightgray, fontcolor = lightgray  ]
           branch1b [ shape = invhouse, label = "stable" ]
           branch2b [ shape = invhouse, label = "devel" ]
           headb [ shape = point, xlabel = "HEAD" ]
@@ -348,8 +348,8 @@ Merge vs rebase
           commit2b -> commit1b
           commit3b -> commit2b
           commit4b -> commit3b
-          commit3bo -> base_commitb
-          commit4bo -> commit3bo
+          commit3bo -> base_commitb [ color = lightgray ]
+          commit4bo -> commit3bo [ color = lightgray ]
 
           branch2b -> commit4b
           branch1b -> commit2b
@@ -403,16 +403,54 @@ Distributed workflow with PRs
          userbranch -> userbranch1 [ style = dotted ]
          userbranch1 -> userbranch2 [ style = dotted ]
 
+         commit1a -> commit1primea [ style = dotted ]
+         commit1primea -> commit1prime2a [ style = dotted ]
+
          commit2a [ label = "Commit 2" ]
          base -> commit2a [ arrowhead = inv ]
+
+         commit1x [ label = "Commit 1&Prime;&prime;" ]
+         commit2a -> commit1x [ arrowhead = inv ]
+
+         main2 [ shape = invhouse, label = "main", fontname = "monospace" ]
+         main2 -> commit1x
+         main -> main2 [ style = dotted ]
+
+         subgraph cluster_pr {
+             label = "Pull requests"
+             pr [ shape = hexagon, label = "PR" ]
+
+         }
       }
+
 
       subgraph cluster_maintainer {
          label = "Maintainer"
+
+         commit2b [ label = "Commit 2" ]
+         commit1prime3 [ label = "Commit 1&Prime;" ]
+         commit1prime4 [ label = "Commit 1&Prime;&prime;" ]
+         commit1prime3 -> commit1prime4 [ label = "git rebase" ]
+         commit2b -> commit1prime4 [ arrowhead = inv ]
+         userbranchb [ shape = invhouse, label = "feature", fontname = "monospace" ]
+
+         userbranchb -> commit1prime3
+
+         mainb [ shape = invhouse, label = "main", fontname = "monospace" ]
+         mainb -> commit2b
+
+         userbranchc [ shape = invhouse, label = "feature", fontname = "monospace" ]
+         userbranchc -> commit1prime4
+
+         userbranchb -> userbranchc [ style = dotted ]
       }
 
       base -> base0 [ label = "git pull" ]
       commit1 -> commit1a [ label = "git push origin HEAD:user/name/feature"]
       commit1prime -> commit1primea [ label = "git push origin +HEAD:user/name/feature"]
       commit1prime2 -> commit1prime2a [ label = "git push origin +HEAD:user/name/feature"]
+
+      commit2a -> commit2b [ label = "git pull" ]
+      commit1prime4 -> commit1x [ label = "git push origin HEAD:main" ]
+      commit1prime2a -> commit2a [ arrowhead = inv ]
    }
