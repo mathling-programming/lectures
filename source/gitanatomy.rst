@@ -416,21 +416,29 @@ Distributed workflow with PRs
          main2 -> commit1x
          main -> main2 [ style = dotted ]
 
-         subgraph cluster_pr {
-             label = "Pull requests"
-             pr [ shape = hexagon, label = "PR" ]
+         base -> commit1a [ arrowhead = inv ]
+         base -> commit1primea [ arrowhead = inv ]
+         base -> commit1prime2a [ arrowhead = inv ]
 
-         }
+         commit1primea -> pr [ label = "Update", fontname = "serif" ]
+         commit1prime2a -> pr [ label = "Update", fontname = "serif" ]
       }
 
+      subgraph cluster_pr {
+         label = "Pull requests"
+         pr [ shape = hexagon, label = "PR" ]
+      }
 
       subgraph cluster_maintainer {
-         label = "Maintainer"
+         label = "Maintainer's repo"
 
+         baseb [ label = "Base commit" ]
          commit2b [ label = "Commit 2" ]
          commit1prime3 [ label = "Commit 1&Prime;" ]
          commit1prime4 [ label = "Commit 1&Prime;&prime;" ]
          commit1prime3 -> commit1prime4 [ label = "git rebase" ]
+         baseb -> commit2b [ arrowhead = inv ]
+         baseb -> commit1prime3 [ arrowhead = inv ]
          commit2b -> commit1prime4 [ arrowhead = inv ]
          userbranchb [ shape = invhouse, label = "feature", fontname = "monospace" ]
 
@@ -451,6 +459,8 @@ Distributed workflow with PRs
       commit1prime2 -> commit1prime2a [ label = "git push origin +HEAD:user/name/feature"]
 
       commit2a -> commit2b [ label = "git pull" ]
+      commit1prime2a -> commit1prime3 [ label = "git pull" ]
       commit1prime4 -> commit1x [ label = "git push origin HEAD:main" ]
-      commit1prime2a -> commit2a [ arrowhead = inv ]
+
+      commit1 -> pr [ label = "Create a pull request", fontname = "serif" ]
    }
