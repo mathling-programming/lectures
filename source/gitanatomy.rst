@@ -7,6 +7,7 @@ Merkle tree
 .. graphviz::
 
    digraph {
+      nodesep = 1.5
       node [ shape = component, fontname = "monospace" ]
       edge [ fontname = "monospace", labelfontname = "monospace" ]
       blob1 [ shape = note, label = "9daeafb", tooltip = "9daeafb9864cf43055ae93beb0afd6c7d144bfa4" ]
@@ -18,15 +19,15 @@ Merkle tree
       tree2 [ shape = folder, label = "bffa072" ]
       subtree [ shape = folder, label = "c5a917c" ]
 
-      tree1 -> blob1 [ dir = none, label = "file.dat" ]
-      tree1 -> blob2 [ dir = none, label = "newfile.dat" ]
-      tree2 -> blob1 [ dir = none, label = "file.dat" ]
-      tree2 -> blob3 [ dir = none, label = "oldname.dat" ]
-      tree1 -> blob3 [ dir = none, label = "newname.dat" ]
-      tree2 -> blob4 [ dir = none, label = "deleted.dat" ]
-      subtree -> subblob [ dir = none, label = "subfile.dat" ]
-      tree1 -> subtree [ dir = none, label = "dir/" ]
-      tree2 -> subtree [ dir = none, label = "dir/" ]
+      tree1 -> blob1 [ arrowhead = diamond, label = "file.dat", constraint = false ]
+      tree1 -> blob2 [ arrowhead = diamond, label = "newfile.dat" ]
+      tree2 -> blob1 [ arrowhead = diamond, label = "file.dat", constraint = false ]
+      tree2 -> blob3 [ arrowhead = diamond, label = "oldname.dat" ]
+      tree1 -> blob3 [ arrowhead = diamond, label = "newname.dat" ]
+      tree2 -> blob4 [ arrowhead = diamond, label = "deleted.dat" ]
+      subtree -> subblob [ arrowhead = diamond, label = "subfile.dat" ]
+      tree1 -> subtree [ arrowhead = diamond, label = "dir/", minlen = 2 ]
+      tree2 -> subtree [ arrowhead = diamond, label = "dir/" ]
 
       commit1 [ tooltip = "git mv oldname.dat newname.dat\ngit rm deleted.dat\ngit add newfile.dat", fontsize = 12,
                 label = "5ecdca016974fe5faa884c24515f3e6302209d7e\l\lAuthor: John R. Hacker <jrhacker@example.com>\lDate: Fri Mar 10 18:45:22 2023 +0300\l\llatest commit here\l"]
@@ -50,6 +51,8 @@ Merkle tree
       branch2 -> commit1
       tag1 [ shape = cds, label = "v1.0.0" ]
       tag1 -> commit3
+
+      commit2 -> blob1 [ style = invis ]
    }
 
 .. graphviz::
@@ -84,7 +87,7 @@ Merkle tree
 +----------+----------+--------+
 | tags     | No       | Yes/No |
 +----------+----------+--------+
-| branches | Yes      | No     |
+| branches | Yes      | Yes    |
 +----------+----------+--------+
 
 
@@ -202,7 +205,7 @@ Basic push
 
       base_commit -> base_commit0 [ label = "git pull", fontname = "monospace" ]
       commit2_base -> commit2_2 [ label = "git pull", fontname = "monospace" ]
-      commit2 -> commit2_base [ label = "git push", fontname = "monospace" ]
+      commit2 -> commit2_base [ label = <<table bgcolor="white" border="0" cellborder="0"><tr><td>git push</td></tr></table>>, fontname = "monospace" ]
    }
 
 
@@ -268,10 +271,10 @@ Forced push
 
       base_commit -> base_commit0 [ label = "git pull", fontname = "monospace" ]
       base_commit -> base_commit1 [ label = "git pull", fontname = "monospace" ]
-      commit3 -> commit3_base [ label = "git push", fontname = "monospace" ]
-      commit2 -> origin_branch_new [ label = "git push", color = red, arrowhead = tee, fontname = "monospace" ]
+      commit3 -> commit3_base [ label = <<table bgcolor="white" border="0" cellborder="0"><tr><td>git push</td></tr></table>>, fontname = "monospace" ]
+      commit2 -> origin_branch_new [ label = <<table bgcolor="white" border="0" cellborder="0"><tr><td>git push</td></tr></table>>, color = red, arrowhead = tee, fontname = "monospace" ]
       commit2 -> commit2_base [ label = "git push --force", fontname = "monospace" ]
-      commit2_base -> commit2_2 [ label = "git pull", fontname = "monospace" ]
+      commit2_base -> commit2_2 [ label = <<table bgcolor="white" border="0" cellborder="0"><tr><td>git pull</td></tr></table>>, fontname = "monospace" ]
    }
 
 Merge vs rebase
@@ -285,6 +288,7 @@ Merge vs rebase
       compound = true
       rankdir = LR
       subgraph cluster_old {
+          margin = 16
           base_commit [ label = "Base commit" ]
           commit1 [ label = "Commit 1" ]
           commit2 [ label = "Commit 2" ]
@@ -336,8 +340,8 @@ Merge vs rebase
           base_commitb [ label = "Base commit" ]
           commit1b [ label = "Commit 1" ]
           commit2b [ label = "Commit 2" ]
-          commit3b [ label = "Commit 3&prime;" ]
-          commit4b [ label = "Commit 4&prime;" ]
+          commit3b [ label = "Commit 3&dagger;" ]
+          commit4b [ label = "Commit 4&dagger;" ]
           commit3bo [ label = "Commit 3", color = lightgray, fontcolor = lightgray ]
           commit4bo [ label = "Commit 4", color = lightgray, fontcolor = lightgray  ]
           branch1b [ shape = invhouse, label = "stable" ]
@@ -369,74 +373,101 @@ Distributed workflow with PRs
 
    digraph {
       node [ shape = component ]
-      edge [ fontname = "monospace" ]
+      edge [ fontname = "monospace", labelfontname = "monospace" ]
+      rankdir = LR
+
       subgraph cluster_local {
          label = "Local repo"
 
-         base0 [ label = "Base commit" ]
+         subgraph {
+            rank = same
+            local [ shape = "invhouse", label = "mybranch" ]
+            base0 [ label = "Base commit" ]
+            local -> base0 [ xlabel = <<table bgcolor="white" border="0" cellborder="0"><tr><td>git checkout -b mybranch</td></tr></table>> ]
+         }
+
          commit1 [ label = "Commit 1" ]
-         local [ shape = "invhouse", label = "mybranch" ]
-         local -> base0 [ label = "git checkout -b mybranch" ]
          base0 -> commit1 [ arrowhead = inv, label = "git commit" ]
-         commit1prime [ label = "Commit 1&prime;" ]
+         commit1prime [ label = "Commit 1&dagger;" ]
          commit1 -> commit1prime [ label = "git commit --amend" ]
-         commit1prime2 [ label = "Commit 1&Prime;" ]
+         commit1prime2 [ label = "Commit 1&Dagger;" ]
          commit1prime -> commit1prime2 [ label = "git commit --amend" ]
       }
 
       subgraph cluster_remote {
          label = "Remote repo"
 
-         base [ label = "Base commit" ]
-         main [ shape = invhouse, label = "main", fontname = "monospace" ]
-         main -> base
-         commit1a [ label = "Commit 1" ]
-         userbranch [ shape = invhouse, label = "user/name/feature", fontname = "monospace" ]
-         userbranch -> commit1a
-         commit1primea [ label = "Commit 1&prime;" ]
-         userbranch1 [ shape = invhouse, label = "user/name/feature", fontname = "monospace" ]
-         userbranch1 -> commit1primea
-         commit1prime2a [ label = "Commit 1&Prime;" ]
-         userbranch2 [ shape = invhouse, label = "user/name/feature", fontname = "monospace" ]
-         userbranch2 -> commit1prime2a
+         subgraph {
+            rank = same
+            base [ label = "Base commit" ]
+            main [ shape = invhouse, label = "main", fontname = "monospace" ]
+            main -> base
+         }
 
+         subgraph {
+            rank = same
+            userbranch [ shape = invhouse, label = "user/name/feature", fontname = "monospace" ]
+            commit1a [ label = "Commit 1" ]
+            userbranch -> commit1a
+            pr [ shape = hexagon, label = "PR" ]
+         }
+         base -> commit1a [ arrowhead = inv ]
+
+         subgraph {
+            rank = same
+            userbranch1 [ shape = invhouse, label = "user/name/feature", fontname = "monospace" ]
+            commit1primea [ label = "Commit 1&dagger;" ]
+            userbranch1 -> commit1primea
+            pr0 [ shape = hexagon, label = "PR" ]
+         }
+
+         base -> commit1primea [ arrowhead = inv ]
          userbranch -> userbranch1 [ style = dotted ]
-         userbranch1 -> userbranch2 [ style = dotted ]
-
+         pr -> pr0 [ style = dotted ]
          commit1a -> commit1primea [ style = dotted ]
+
+         subgraph {
+            rank = same
+            userbranch2 [ shape = invhouse, label = "user/name/feature", fontname = "monospace" ]
+            commit1prime2a [ label = "Commit 1&Dagger;" ]
+            userbranch2 -> commit1prime2a
+            pr1 [ shape = hexagon, label = "PR" ]
+         }
+
+         base -> commit1prime2a [ arrowhead = inv ]
+         userbranch1 -> userbranch2 [ style = dotted ]
          commit1primea -> commit1prime2a [ style = dotted ]
+         pr0 -> pr1 [ style = dotted ]
 
-         commit2a [ label = "Commit 2" ]
+         subgraph {
+            rank = same
+            commit2a [ label = "Commit 2" ]
+            commit1x [ label = "Commit 1&bull;" ]
+            commit2a -> commit1x [ arrowhead = inv ]
+
+            main2 [ shape = invhouse, label = "main", fontname = "monospace" ]
+            main2 -> commit1x [ constraint = false ]
+         }
+
          base -> commit2a [ arrowhead = inv ]
-
-         commit1x [ label = "Commit 1&Prime;&prime;" ]
-         commit2a -> commit1x [ arrowhead = inv ]
-
-         main2 [ shape = invhouse, label = "main", fontname = "monospace" ]
-         main2 -> commit1x
          main -> main2 [ style = dotted ]
 
-         base -> commit1a [ arrowhead = inv ]
-         base -> commit1primea [ arrowhead = inv ]
-         base -> commit1prime2a [ arrowhead = inv ]
+         commit1prime2a -> commit1x [ style = invis ]
+         commit1prime2a -> main2 [ style = invis ]
 
-         commit1primea -> pr [ label = "Update", fontname = "serif" ]
-         commit1prime2a -> pr [ label = "Update", fontname = "serif" ]
-      }
-
-      subgraph cluster_pr {
-         label = "Pull requests"
-         pr [ shape = hexagon, label = "PR" ]
+         commit1primea -> pr0 [ xlabel = "Update", labelfontname = "serif" ]
+         commit1prime2a -> pr1 [ xlabel = "Update", fontname = "serif" ]
       }
 
       subgraph cluster_maintainer {
          label = "Maintainer's repo"
+         margin = 16
 
          baseb [ label = "Base commit" ]
          commit2b [ label = "Commit 2" ]
-         commit1prime3 [ label = "Commit 1&Prime;" ]
-         commit1prime4 [ label = "Commit 1&Prime;&prime;" ]
-         commit1prime3 -> commit1prime4 [ label = "git rebase" ]
+         commit1prime3 [ label = "Commit 1&Dagger;" ]
+         commit1prime4 [ label = "Commit 1&bull;" ]
+         commit1prime3 -> commit1prime4 [ xlabel = "git rebase" ]
          baseb -> commit2b [ arrowhead = inv ]
          baseb -> commit1prime3 [ arrowhead = inv ]
          commit2b -> commit1prime4 [ arrowhead = inv ]
@@ -451,16 +482,23 @@ Distributed workflow with PRs
          userbranchc -> commit1prime4
 
          userbranchb -> userbranchc [ style = dotted ]
+
+         baseb -> userbranchb [ style = invis ]
       }
 
       base -> base0 [ label = "git pull" ]
-      commit1 -> commit1a [ label = "git push origin HEAD:user/name/feature"]
-      commit1prime -> commit1primea [ label = "git push origin +HEAD:user/name/feature"]
-      commit1prime2 -> commit1prime2a [ label = "git push origin +HEAD:user/name/feature"]
 
-      commit2a -> commit2b [ label = "git pull" ]
-      commit1prime2a -> commit1prime3 [ label = "git pull" ]
-      commit1prime4 -> commit1x [ label = "git push origin HEAD:main" ]
+      commit1 -> pr [ label = "Create a pull request", decorate = true ]
 
-      commit1 -> pr [ label = "Create a pull request", fontname = "serif" ]
+      commit1 -> commit1a [ label = "git push origin HEAD:user/name/feature", constraint = false, decorate = true ]
+      commit1prime -> commit1primea [ label = "git push origin +HEAD:user/name/feature", constraint = false ]
+      commit1prime2 -> commit1prime2a [ label = "git push origin +HEAD:user/name/feature", constraint = false ]
+
+      commit2a -> commit2b [ label = "git pull", constraint = false, decorate = true ]
+      commit1prime2a -> commit1prime3 [ label = "git pull", constraint = false ]
+      commit1prime4 -> commit1x [ taillabel = "git push origin HEAD:main", constraint = false, labeldistance = 30, labelangle = 0 ]
+
+      pr -> commit1prime [ label = <<table bgcolor="white" border="0" cellborder="0"><tr><td>Review notes</td></tr></table>>, fontname = "serif", constraint = false ]
+      pr0 -> commit1prime2 [ label = <<table bgcolor="white" border="0" cellborder="0"><tr><td>Review notes</td></tr></table>>, fontname = "serif", constraint = false ]
+      pr1 -> commit1prime3 [ taillabel = "Approve", fontname = "serif", constraint = false, labeldistance = 5, labelangle = -10 ]
    }

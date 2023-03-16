@@ -33,12 +33,6 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.mathjax',
     'sphinx.ext.todo',
-    'sphinxcontrib.blockdiag',
-    'sphinxcontrib.seqdiag',
-    'sphinxcontrib.actdiag',
-    'sphinx_tabs.tabs',
-    'sphinxcontrib.programoutput',
-    'sphinx-prompt',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -55,11 +49,15 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'classic'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+html_theme_options = {
+    'body_max_width': '90%'
+}
 
 graphviz_output_format = 'svg'
